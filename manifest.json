@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT Toolkit",
+  "version": "2.0.2",
+  "description": "Export complete ChatGPT conversations as Markdown or JSON in Chrome and Edge.",
+  "icons": {
+    "16": "image/icon16.png",
+    "48": "image/icon48.png",
+    "128": "image/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*"
+      ],
+      "exclude_matches": [
+        "https://chat.openai.com/backend-api/*",
+        "https://chatgpt.com/backend-api/*"
+      ],
+      "js": [
+        "core/state.js",
+        "core/i18n.js",
+        "utils/storage.js",
+        "utils/dom.js",
+        "ui/theme.js",
+        "features/search.js",
+        "features/export.js",
+        "ui/toolbar.js",
+        "contentScript.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "debugger",
+    "downloads",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*"
+  ]
+}
