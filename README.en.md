@@ -12,7 +12,9 @@ The extension avoids relying on virtualized DOM content or page scrolling. Long 
 
 > A full export reloads the current ChatGPT conversation once and temporarily attaches the Chromium debugger. The debugger is detached automatically when the export completes.
 
-## Features
+![ChatGPT Toolkit overview](./image/readme/toolkit-overview.png)
+
+## ✨ Features
 
 - Export complete ChatGPT conversations without scrolling the page.
 - Export as Markdown or JSON.
@@ -24,9 +26,13 @@ The extension avoids relying on virtualized DOM content or page scrolling. Long 
 - Follow ChatGPT light and dark themes.
 - Support Google Chrome and Microsoft Edge.
 
-![Extension Icon](./image/icon-source-cropped.png)
+<p align="center">
+  <img src="./image/readme/toolkit-panel.png" alt="ChatGPT Toolkit panel" width="308">
+  &nbsp;&nbsp;
+  <img src="./image/readme/floating-button.png" alt="GPT floating button" width="44">
+</p>
 
-## Supported Environment
+## 🧩 Supported Environment
 
 - Chromium Manifest V3
 - Google Chrome
@@ -36,7 +42,7 @@ The extension avoids relying on virtualized DOM content or page scrolling. Long 
 
 The full-export implementation requires Chromium's `chrome.debugger` API and does not support Firefox.
 
-## Installation
+## 📦 Installation
 
 ### Chrome
 
@@ -46,6 +52,12 @@ The full-export implementation requires Chromium's `chrome.debugger` API and doe
 4. Select this project directory.
 5. Approve the requested permissions.
 
+![Chrome extension installation](./image/readme/chrome-installation.png)
+
+<p align="center">
+  <img src="./image/readme/extension-details.png" alt="Installed ChatGPT Toolkit" width="433">
+</p>
+
 ### Microsoft Edge
 
 1. Open `edge://extensions/`.
@@ -54,7 +66,9 @@ The full-export implementation requires Chromium's `chrome.debugger` API and doe
 4. Select this project directory.
 5. Approve the requested permissions.
 
-## Permissions
+Chrome and Edge are both Chromium-based, so they use the same installation steps and full-export mechanism.
+
+## 🔐 Browser Permissions and Invocation
 
 The extension requests the following elevated permissions:
 
@@ -62,9 +76,21 @@ The extension requests the following elevated permissions:
 - `downloads`: download generated Markdown or JSON files.
 - `tabs`: report export results after the conversation reloads.
 
-The browser may show a debugger-attached notice during export. This is Chromium's normal security notice for the `chrome.debugger` API. The extension attaches only after the user clicks Export and detaches after success, failure, or timeout.
+These permissions are not continuously invoked after browser startup. The background service worker runs this sequence only when the user clicks `Export`:
 
-## Usage
+```text
+Click Export
+  -> chrome.runtime.sendMessage notifies the background service worker
+  -> chrome.debugger.attach temporarily attaches to the current ChatGPT tab
+  -> Network.enable and reload the current conversation
+  -> capture and parse the complete conversation response
+  -> chrome.downloads.download saves the generated file
+  -> chrome.debugger.detach disconnects automatically
+```
+
+The extension does not read network responses from other tabs and does not keep the debugger attached continuously. It attempts to detach after success, failure, or timeout. Chromium may display a debugger-attached notice during export; this is the browser's normal security notice for the `chrome.debugger` API.
+
+## 🚀 Usage
 
 1. Open the ChatGPT conversation to export.
 2. Click the bottom-right `GPT` button to expand the toolkit.
@@ -74,7 +100,20 @@ The browser may show a debugger-attached notice during export. This is Chromium'
 
 The export no longer scrolls the page. Switching to another tab does not interrupt network capture.
 
-## Exported Content
+## 📝 Output Filename
+
+Exported files use:
+
+```text
+conversation-title-YYMM.md
+conversation-title-YYMM.json
+```
+
+For example, a conversation titled `python` exported in June 2026 becomes `python-2606.md`.
+
+The extension first uses `conversation.title` from the complete conversation response, then falls back to the current ChatGPT page title. Invalid Windows filename characters are replaced automatically.
+
+## 📄 Exported Content
 
 ### Markdown
 
@@ -133,7 +172,7 @@ JSON exports include metadata and the complete message array:
 }
 ```
 
-## Search
+## 🔎 Search
 
 - Search text in currently rendered messages.
 - Highlight matching text.
@@ -141,7 +180,7 @@ JSON exports include metadata and the complete message array:
 
 Search covers currently rendered page content. Full export does not have this limitation.
 
-## How It Works
+## ⚙️ How It Works
 
 ```text
 User clicks Export
@@ -153,7 +192,7 @@ User clicks Export
   -> file downloads and debugger detaches automatically
 ```
 
-## Known Limitations
+## ⚠️ Known Limitations
 
 - ChatGPT private response format changes may require parser updates.
 - The browser displays a debugger-attached notice during export.
@@ -162,7 +201,7 @@ User clicks Export
 - Search covers only currently rendered messages.
 - Full export does not support Firefox.
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```text
 background.js          Chromium debugger capture and file download
@@ -177,7 +216,7 @@ manifest.json          Manifest V3 configuration
 styles.css             Toolbar and search styles
 ```
 
-## Version
+## 📌 Version
 
 ### Current version: v2.0.2
 
@@ -188,6 +227,6 @@ styles.css             Toolbar and search styles
 - Original Mermaid, LaTeX, and fenced code block preservation.
 - Rendered-message search.
 
-## License
+## 📜 License
 
 This project is licensed under the [MIT License](./LICENSE).

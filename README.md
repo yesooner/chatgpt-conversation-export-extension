@@ -12,7 +12,9 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 
 > 完整导出会刷新当前 ChatGPT 会话一次，并在导出期间临时附加 Chromium 调试器。导出完成后会自动断开。
 
-## 功能特点
+![ChatGPT Toolkit 使用界面](./image/readme/toolkit-overview.png)
+
+## ✨ 功能特点
 
 - 完整导出当前 ChatGPT 会话，不依赖页面滚动。
 - 支持 Markdown 和 JSON 两种导出格式。
@@ -24,9 +26,13 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 - 自动跟随 ChatGPT 明暗主题。
 - 支持 Chrome 和 Microsoft Edge。
 
-![Extension Icon](./image/icon-source-cropped.png)
+<p align="center">
+  <img src="./image/readme/toolkit-panel.png" alt="ChatGPT Toolkit 工具栏" width="308">
+  &nbsp;&nbsp;
+  <img src="./image/readme/floating-button.png" alt="GPT 悬浮按钮" width="44">
+</p>
 
-## 使用环境
+## 🧩 使用环境
 
 - Chromium Manifest V3
 - Google Chrome
@@ -36,7 +42,7 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 
 当前完整导出方案依赖 Chromium 的 `chrome.debugger` API，因此不支持 Firefox。
 
-## 安装方法
+## 📦 安装方法
 
 ### Chrome
 
@@ -46,6 +52,12 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 4. 选择本项目根目录。
 5. 接受扩展权限。
 
+![Chrome 扩展安装界面](./image/readme/chrome-installation.png)
+
+<p align="center">
+  <img src="./image/readme/extension-details.png" alt="已安装的 ChatGPT Toolkit" width="433">
+</p>
+
 ### Microsoft Edge
 
 1. 打开 `edge://extensions/`。
@@ -54,7 +66,9 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 4. 选择本项目根目录。
 5. 接受扩展权限。
 
-## 权限说明
+Chrome 和 Edge 均基于 Chromium，因此安装方式和完整导出原理一致。
+
+## 🔐 浏览器权限与调用方式
 
 扩展声明以下高权限：
 
@@ -62,9 +76,21 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 - `downloads`：下载生成的 Markdown 或 JSON 文件。
 - `tabs`：在页面刷新后发送导出结果状态。
 
-点击导出后，浏览器可能显示调试器已附加提示。这是 Chromium 对 `chrome.debugger` API 的正常安全提示。扩展只在用户主动点击导出时附加当前 ChatGPT 标签页，并在成功、失败或超时后自动断开。
+权限不会在浏览器启动后持续调用。只有用户主动点击 `Export` 时，后台 Service Worker 才会对**当前 ChatGPT 标签页**执行以下流程：
 
-## 使用方法
+```text
+点击 Export
+  -> chrome.runtime.sendMessage 通知后台 Service Worker
+  -> chrome.debugger.attach 临时附加当前 ChatGPT 标签页
+  -> Network.enable 并刷新当前会话
+  -> 捕获并解析当前会话的完整网络响应
+  -> chrome.downloads.download 保存导出文件
+  -> chrome.debugger.detach 自动断开
+```
+
+扩展不会读取其他标签页的网络响应，也不会持续保持调试器连接。成功、失败或超时后都会尝试自动断开。导出期间浏览器可能显示“调试器已附加”提示，这是 Chromium 对 `chrome.debugger` API 的正常安全提示。
+
+## 🚀 使用方法
 
 1. 打开需要导出的 ChatGPT 会话。
 2. 点击右下角 `GPT` 悬浮按钮展开工具栏。
@@ -74,7 +100,20 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 
 导出过程不再滚动页面。切换到其他标签页不会影响网络响应捕获。
 
-## 导出内容
+## 📝 输出文件命名
+
+导出文件默认使用：
+
+```text
+对话名称-YYMM.md
+对话名称-YYMM.json
+```
+
+例如，标题为 `python`、导出时间为 2026 年 6 月时，文件名为 `python-2606.md`。
+
+命名时优先读取完整会话响应中的 `conversation.title`；若无法取得，则使用当前 ChatGPT 页面标题。文件名中的 Windows 非法字符会自动替换，避免下载失败。
+
+## 📄 导出内容
 
 ### Markdown
 
@@ -133,7 +172,7 @@ JSON 文件包含导出元数据和完整消息数组：
 }
 ```
 
-## 搜索功能
+## 🔎 搜索功能
 
 - 在当前已渲染消息中搜索文本。
 - 高亮匹配内容。
@@ -141,7 +180,7 @@ JSON 文件包含导出元数据和完整消息数组：
 
 搜索功能依赖当前页面已渲染的消息；完整导出不受此限制。
 
-## 工作原理
+## ⚙️ 工作原理
 
 ```text
 用户点击 Export
@@ -153,7 +192,7 @@ JSON 文件包含导出元数据和完整消息数组：
   -> 下载文件并自动断开调试器
 ```
 
-## 已知限制
+## ⚠️ 已知限制
 
 - ChatGPT 私有网络响应结构发生变化时，完整导出解析可能需要同步更新。
 - 浏览器会在导出期间显示调试器附加提示。
@@ -162,7 +201,7 @@ JSON 文件包含导出元数据和完整消息数组：
 - 搜索仅覆盖当前页面已渲染内容。
 - 当前完整导出不支持 Firefox。
 
-## 项目结构
+## 🗂️ 项目结构
 
 ```text
 background.js          Chromium debugger 网络捕获与文件下载
@@ -177,7 +216,7 @@ manifest.json          Manifest V3 配置
 styles.css             工具栏与搜索界面样式
 ```
 
-## 版本说明
+## 📌 版本说明
 
 ### 当前版本：v2.0.2
 
@@ -188,6 +227,6 @@ styles.css             工具栏与搜索界面样式
 - 保留原始 Mermaid、LaTeX 和代码块。
 - 保留当前页面消息搜索功能。
 
-## 许可证
+## 📜 许可证
 
 本项目采用 [MIT License](./LICENSE)。
