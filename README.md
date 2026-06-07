@@ -28,8 +28,6 @@ ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 Ch
 
 <p align="center">
   <img src="./image/readme/toolkit-panel.png" alt="ChatGPT Toolkit 工具栏" width="308">
-  &nbsp;&nbsp;
-  <img src="./image/readme/floating-button.png" alt="GPT 悬浮按钮" width="44">
 </p>
 
 ## 🧩 使用环境
