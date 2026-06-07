@@ -28,8 +28,6 @@ The extension avoids relying on virtualized DOM content or page scrolling. Long 
 
 <p align="center">
   <img src="./image/readme/toolkit-panel.png" alt="ChatGPT Toolkit panel" width="308">
-  &nbsp;&nbsp;
-  <img src="./image/readme/floating-button.png" alt="GPT floating button" width="44">
 </p>
 
 ## 🧩 Supported Environment
