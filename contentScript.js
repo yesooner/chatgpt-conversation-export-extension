@@ -40,6 +40,10 @@ if (isToolkitSupportedPage && !window[TOOLKIT_BOOTSTRAP_FLAG]) {
     if (message?.type !== "chatgpt-toolkit-debugger-export-result") {
       return false;
     }
+    const exportButton = document.querySelector(`#${TOOLKIT_ID} [data-action="export"]`);
+    if (exportButton instanceof HTMLButtonElement) {
+      exportButton.disabled = false;
+    }
     if (message.ok) {
       updateStatusByKey("status.exportDone", "success", {
         format: message.format,
@@ -48,6 +52,7 @@ if (isToolkitSupportedPage && !window[TOOLKIT_BOOTSTRAP_FLAG]) {
     } else {
       updateStatusText(`Export failed: ${message.error || "Unknown debugger export error"}`, "error");
     }
+    expandToolbar();
     return false;
   });
 

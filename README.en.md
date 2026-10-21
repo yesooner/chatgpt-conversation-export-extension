@@ -6,17 +6,17 @@
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green"></a>
 </p>
 
-ChatGPT Conversation Export is a **Chrome and Microsoft Edge** extension that exports complete ChatGPT conversations as Markdown or JSON. It uses Chromium's built-in `chrome.debugger` API to capture the conversation data loaded by ChatGPT itself.
+ChatGPT Conversation Export is a **Chrome and Microsoft Edge** extension that exports complete ChatGPT conversations as Markdown or JSON. It uses Chromium's built-in `chrome.debugger` API to read conversation data in the current ChatGPT tab.
 
 The extension avoids relying on virtualized DOM content or page scrolling. Long conversations can be exported with complete user messages, assistant responses, fenced code blocks, Mermaid source, and LaTeX formulas even when only part of the conversation is rendered on screen.
 
-> A full export reloads the current ChatGPT conversation once and temporarily attaches the Chromium debugger. The debugger is detached automatically when the export completes.
+> Export temporarily attaches the Chromium debugger and detaches it when finished. The extension reads the conversation API in the current page first, then reloads and captures network responses only if that fails.
 
 ![ChatGPT Toolkit overview](./image/readme/toolkit-overview.png)
 
 ## ✨ Features
 
-- Export complete ChatGPT conversations without scrolling the page.
+- Export complete ChatGPT conversations, including older paginated messages, without scrolling the page.
 - Export as Markdown or JSON.
 - Name files as `conversation-title-YYMM.md` or `conversation-title-YYMM.json`.
 - Preserve original assistant Markdown.
@@ -80,8 +80,8 @@ These permissions are not continuously invoked after browser startup. The backgr
 Click Export
   -> chrome.runtime.sendMessage notifies the background service worker
   -> chrome.debugger.attach temporarily attaches to the current ChatGPT tab
-  -> Network.enable and reload the current conversation
-  -> capture and parse the complete conversation response
+  -> read the conversation API and older pages in the current tab
+  -> reload and capture the network response if needed
   -> chrome.downloads.download saves the generated file
   -> chrome.debugger.detach disconnects automatically
 ```
@@ -94,9 +94,9 @@ The extension does not read network responses from other tabs and does not keep 
 2. Click the bottom-right `GPT` button to expand the toolkit.
 3. Select `Markdown` or `JSON`.
 4. Click `Export`.
-5. The conversation reloads once and the generated file downloads automatically.
+5. The generated file downloads automatically. The conversation reloads once only if the direct API read fails.
 
-The export no longer scrolls the page. Switching to another tab does not interrupt network capture.
+Export does not scroll the page. Use it on a specific conversation whose address contains `/c/`.
 
 ## 📝 Output Filename
 
@@ -183,8 +183,8 @@ Search covers currently rendered page content. Full export does not have this li
 ```text
 User clicks Export
   -> background service worker attaches chrome.debugger
-  -> current ChatGPT conversation reloads
-  -> extension captures and parses the complete conversation response
+  -> extension reads the current conversation and all older pages
+  -> reloads and captures the network response if needed
   -> current User / Assistant / System branch is ordered
   -> Markdown or JSON is generated
   -> file downloads and debugger detaches automatically
@@ -193,6 +193,7 @@ User clicks Export
 ## ⚠️ Known Limitations
 
 - ChatGPT private response format changes may require parser updates.
+- Export is available on conversation pages; the home page prompts you to open a conversation.
 - The browser displays a debugger-attached notice during export.
 - Export may fail if another debugger or DevTools session is already attached to the tab.
 - Export follows the currently selected conversation branch rather than every historical branch.
@@ -216,9 +217,12 @@ styles.css             Toolbar and search styles
 
 ## 📌 Version
 
-### Current version: v2.0.2
+### Current version: v2.0.4
 
-- Complete conversation export through Chromium debugger network responses.
+- Support both legacy `mapping` and current paginated `messages` conversation formats.
+- Read the browser conversation API first, with debugger network capture as a fallback.
+- Show an error on non-conversation pages and display the export result.
+- Wait for Chrome to confirm download completion and report interruptions.
 - Markdown and JSON export.
 - Conversation-title filenames.
 - Chrome and Microsoft Edge support.

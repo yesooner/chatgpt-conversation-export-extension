@@ -203,6 +203,10 @@ const collectAllConversationMessages = async (onProgress = null) => {
 
 const exportMessages = async (format = "json") => {
   ensureConversationState();
+  if (!/\/c\/[^/]+/.test(window.location.pathname)) {
+    updateStatusText("Open a ChatGPT conversation before exporting", "error");
+    return;
+  }
   const exportButton = document.querySelector(`#${TOOLKIT_ID} [data-action="export"]`);
   if (exportButton instanceof HTMLButtonElement && exportButton.disabled) {
     return;
@@ -238,7 +242,6 @@ const exportMessages = async (format = "json") => {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     updateStatusText(`Export failed: ${message}`, "error");
-  } finally {
     if (exportButton instanceof HTMLButtonElement) {
       exportButton.disabled = false;
     }

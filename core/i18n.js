@@ -21,7 +21,7 @@ const I18N_MESSAGES = {
     "toolbar.searchNextTitle": "Next match",
     "status.ready": "Ready to search or export",
     "status.exporting": "Preparing export...",
-    "status.exportDebuggerStarted": "Reloading conversation for complete export...",
+    "status.exportDebuggerStarted": "Exporting conversation...",
     "status.exportCollecting": "Collecting conversation · {count} messages",
     "status.exportDone": "{format} exported · {count} messages",
     "status.exportFailed": "Export failed",

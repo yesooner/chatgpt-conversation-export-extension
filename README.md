@@ -6,17 +6,17 @@
   <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green"></a>
 </p>
 
-ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 ChatGPT 会话导出扩展。它通过 Chromium 内置的 `chrome.debugger` API 捕获 ChatGPT 页面自身加载的完整会话数据，将当前对话快速导出为 Markdown 或 JSON。
+ChatGPT Conversation Export 是一个面向 **Chrome 与 Microsoft Edge** 的 ChatGPT 会话导出扩展。它通过 Chromium 内置的 `chrome.debugger` API 在当前 ChatGPT 标签页读取会话数据，将当前对话导出为 Markdown 或 JSON。
 
 扩展的核心目标是避免依赖虚拟化 DOM 和页面滚动。即使长会话只在页面中渲染部分消息，导出仍可保留完整的用户消息、助手回复、代码块、Mermaid 源码和 LaTeX 公式。
 
-> 完整导出会刷新当前 ChatGPT 会话一次，并在导出期间临时附加 Chromium 调试器。导出完成后会自动断开。
+> 导出期间会临时附加 Chromium 调试器，完成后自动断开。扩展优先从当前页面读取会话接口；接口不可用时才刷新会话并捕获网络响应。
 
 ![ChatGPT Toolkit 使用界面](./image/readme/toolkit-overview.png)
 
 ## ✨ 功能特点
 
-- 完整导出当前 ChatGPT 会话，不依赖页面滚动。
+- 完整导出当前 ChatGPT 会话，包括分页加载的历史消息，不依赖页面滚动。
 - 支持 Markdown 和 JSON 两种导出格式。
 - 文件名自动使用 `对话名称-YYMM.md` 或 `对话名称-YYMM.json`。
 - 保留助手原始 Markdown 内容。
@@ -80,8 +80,8 @@ Chrome 和 Edge 均基于 Chromium，因此安装方式和完整导出原理一�
 点击 Export
   -> chrome.runtime.sendMessage 通知后台 Service Worker
   -> chrome.debugger.attach 临时附加当前 ChatGPT 标签页
-  -> Network.enable 并刷新当前会话
-  -> 捕获并解析当前会话的完整网络响应
+  -> 从当前页面读取会话接口及历史分页
+  -> 必要时刷新并捕获会话网络响应
   -> chrome.downloads.download 保存导出文件
   -> chrome.debugger.detach 自动断开
 ```
@@ -94,9 +94,9 @@ Chrome 和 Edge 均基于 Chromium，因此安装方式和完整导出原理一�
 2. 点击右下角 `GPT` 悬浮按钮展开工具栏。
 3. 选择 `Markdown` 或 `JSON`。
 4. 点击 `Export`。
-5. 当前会话会刷新一次，导出完成后文件自动下载。
+5. 导出完成后文件自动下载；仅在接口读取失败时刷新当前会话一次。
 
-导出过程不再滚动页面。切换到其他标签页不会影响网络响应捕获。
+导出过程不滚动页面。请在地址包含 `/c/` 的具体会话页面使用导出按钮。
 
 ## 📝 输出文件命名
 
@@ -183,8 +183,8 @@ JSON 文件包含导出元数据和完整消息数组：
 ```text
 用户点击 Export
   -> 后台 Service Worker 附加 chrome.debugger
-  -> 刷新当前 ChatGPT 会话
-  -> 监听并解析页面自身的完整会话网络响应
+  -> 读取当前会话接口并逐页获取历史消息
+  -> 必要时刷新并捕获会话网络响应
   -> 沿当前会话分支整理 User / Assistant / System 消息
   -> 生成 Markdown 或 JSON
   -> 下载文件并自动断开调试器
@@ -193,6 +193,7 @@ JSON 文件包含导出元数据和完整消息数组：
 ## ⚠️ 已知限制
 
 - ChatGPT 私有网络响应结构发生变化时，完整导出解析可能需要同步更新。
+- 导出只在具体会话页面可用；主页会提示先打开会话。
 - 浏览器会在导出期间显示调试器附加提示。
 - 若其他 DevTools 或调试器已附加当前标签页，导出可能失败。
 - 当前导出当前选中的会话分支，不同时导出所有历史分叉。
@@ -216,9 +217,12 @@ styles.css             工具栏与搜索界面样式
 
 ## 📌 版本说明
 
-### 当前版本：v2.0.2
+### 当前版本：v2.0.4
 
-- 使用 Chromium debugger 网络响应完成完整会话导出。
+- 兼容旧版 `mapping` 与新版分页 `messages` 会话格式。
+- 优先从浏览器页面直接读取会话数据，失败时回退到 debugger 网络捕获。
+- 在非会话页面提示错误，并在导出结束后显示结果。
+- 等待浏览器确认文件下载完成，下载中断时显示原因。
 - 支持 Markdown 与 JSON。
 - 使用会话标题生成文件名。
 - 支持 Chrome 与 Microsoft Edge。
